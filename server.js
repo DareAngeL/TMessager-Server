@@ -11,5 +11,5 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 1997
 server.listen(PORT, () => {
-  console.log('Listening on port 1997')
+  console.log('Listening on port ' + PORT)
 })
