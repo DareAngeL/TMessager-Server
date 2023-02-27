@@ -1,4 +1,4 @@
-// version 1.0 - update #3
+// version 1.1
 const express = require('express')
 const http = require('http')
 const app = express()
@@ -7,11 +7,10 @@ const { Server } = require("socket.io")
 
 const socketIO = new Server(server)
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.send('Server is running...')
 })
 
-let connected = 0
 // KEYS: MESSAGE, POS
 let unseenMsgs = {
   BABE_RENE: [{}],
@@ -22,7 +21,6 @@ unseenMsgs.BABE_RENE.pop()
 unseenMsgs.BABE_EZIEL.pop()
 
 socketIO.on('connection', (socket) => {
-  connected++
 
   const Events = {
     ENTER_ROOM: 'enter-chatroom',
@@ -34,7 +32,6 @@ socketIO.on('connection', (socket) => {
     RECEIVE: 'rcv',
     CHATMATE_JOINED: 'chat-mate-joined',
     DEL_UNSEEN: 'delete_unseen_msgs'
-
   }
 
   const Users = {
@@ -65,13 +62,15 @@ socketIO.on('connection', (socket) => {
     socket.broadcast.to(room).emit(Events.CHATMATE_JOINED, from)
   })
 
-  socket.on(Events.SEND_MSG, (room, user, msg, position, status) => {
+  socket.on(Events.SEND_MSG, (room, id, user, msg, position, status) => {
     const _msg = {
+      ID: id,
       MSG: msg,
       POS: position,
       STAT: status
     }
-
+    
+    _msg.STAT = Status.SENT
     // emit to the receiver
     socket.broadcast.to(room).emit(Events.NEW_MSG, JSON.stringify(_msg))
 
